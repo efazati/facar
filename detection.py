@@ -1,19 +1,21 @@
+import os
 import face_recognition
-images_path = 'db/image_set/'
+images_path = '/home/user/projects/facar/image_set/'
 known_images_path = images_path + 'known/'
 unknown_images_path = images_path + 'unknown/'
 
-def enocde_face(path):
+def encode_face(im):
+    print (im)
     loaded_image = face_recognition.load_image_file(im)
     face_encoding = face_recognition.face_encodings(loaded_image)[0]
-    
+
     return face_encoding
 
 
 def load_faces(images):
     result = []
     for im in images:
-        result.append(enocde_face(im))
+        result.append(encode_face(im))
  
     return result
 
@@ -32,7 +34,10 @@ def build_db():
     return db
 
 def compare(db, path):
-    unknown = enocde_face(os.path.join(unknown_images_path, path))
+    try:
+        unknown = encode_face(os.path.join(unknown_images_path, path))
+    except:
+        return 'Unknowen image'
     names = []
     for item in db:
         results = face_recognition.compare_faces(item['encoded'], unknown)
@@ -41,7 +46,7 @@ def compare(db, path):
     return names
 
 def main():
-    db = build_db
+    db = build_db()
     for item in os.listdir(unknown_images_path):
         item_rec_faces = compare(db, item)
         print (item, '->', item_rec_faces)
